@@ -6,9 +6,8 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-
-	"github.com/darren-reddick/go-mixcloud-search/schema"
-	"github.com/darren-reddick/go-mixcloud-search/store"
+	"strconv"
+	"time"
 )
 
 type Paging struct {
@@ -17,12 +16,18 @@ type Paging struct {
 }
 
 type Response struct {
-	Data   []schema.Mix `json:"data,omitempty"`
+	Data   []Mix `json:"data,omitempty"`
 	Paging `json:"paging,omitempty"`
 }
 
+type Mix struct {
+	Key  string `json:"key,omitempty"`
+	Url  string `json:"url,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
 type ClientResponse struct {
-	Mixes []schema.Mix
+	Mixes []Mix
 	Next  *url.URL
 }
 
@@ -50,10 +55,10 @@ type Mixcloud struct {
 	Filter
 	Http HttpIface
 	Url  url.URL
-	store.Store
+	Store
 }
 
-func NewMixcloud(s string, filter Filter, http HttpIface, store store.Store) Mixcloud {
+func NewMixcloud(s string, filter Filter, http HttpIface, store Store) Mixcloud {
 	u := url.URL{
 		Scheme:   "https",
 		Host:     config.Host,
@@ -73,11 +78,18 @@ func NewMixcloud(s string, filter Filter, http HttpIface, store store.Store) Mix
 	}
 }
 
-func (a *Mixcloud) Get() (ClientResponse, error) {
-	cr := ClientResponse{}
-	resp, err := a.Http.Get(a.Url.String())
+func (a *Mixcloud) Get(offset int) (bool, error) {
+
+	more := false
+
+	u := a.Url
+	q := u.Query()
+	q.Add("offset", strconv.Itoa(offset))
+	u.RawQuery = q.Encode()
+
+	resp, err := a.Http.Get(u.String())
 	if err != nil {
-		return cr, err
+		return false, err
 	}
 
 	defer resp.Body.Close()
@@ -91,13 +103,27 @@ func (a *Mixcloud) Get() (ClientResponse, error) {
 	}
 
 	if r.Paging.Next != "" {
-		cr.Next, err = url.Parse(r.Paging.Next)
-		if err != nil {
-			return cr, err
-		}
+		more = true
 	}
 
-	fmt.Println(a.Data)
+	return more, nil
+}
 
-	return cr, nil
+func (a *Mixcloud) GetAll() error {
+	offset := 0
+	more := true
+	var err error
+
+	for more == true {
+		fmt.Printf("Fetching offset %d\n", offset)
+		more, err = a.Get(offset)
+		if err != nil {
+			return err
+		}
+		offset += 100
+		time.Sleep(3 * time.Second)
+	}
+
+	return nil
+
 }

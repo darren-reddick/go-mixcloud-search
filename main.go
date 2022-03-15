@@ -5,14 +5,13 @@ import (
 	"net/http"
 
 	"github.com/darren-reddick/go-mixcloud-search/mixcloud"
-	"github.com/darren-reddick/go-mixcloud-search/store"
 )
 
 func main() {
 
-	mc := mixcloud.NewMixcloud("graeme park", mixcloud.Filter{}, &http.Client{}, store.NewStore())
+	mc := mixcloud.NewMixcloud("graeme park", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
 
-	_, err := mc.Get()
+	err := mc.GetAll()
 
 	if err != nil {
 		fmt.Println(err)

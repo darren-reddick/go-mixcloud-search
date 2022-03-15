@@ -1,25 +1,23 @@
-package store
+package mixcloud
 
 import (
 	"sync"
-
-	"github.com/darren-reddick/go-mixcloud-search/schema"
 )
 
 type Store struct {
-	Data map[string]schema.Mix
+	Data map[string]Mix
 	*sync.RWMutex
 }
 
 func NewStore() Store {
-	m := make(map[string]schema.Mix)
+	m := make(map[string]Mix)
 	return Store{
 		m,
 		&sync.RWMutex{},
 	}
 }
 
-func (s *Store) Put(m schema.Mix) error {
+func (s *Store) Put(m Mix) error {
 	s.Lock()
 	defer s.Unlock()
 	s.Data[m.Key] = m
