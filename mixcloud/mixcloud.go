@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
-	"time"
 )
 
 type Paging struct {
@@ -121,9 +121,26 @@ func (a *Mixcloud) GetAll() error {
 			return err
 		}
 		offset += 100
-		time.Sleep(3 * time.Second)
+		//time.Sleep(500 * time.Millisecond)
 	}
 
 	return nil
 
+}
+
+func (a *Mixcloud) WriteJsonToFile() error {
+	data := []byte{}
+	data, err := json.MarshalIndent(&a.Data, "", "    ")
+	if err != nil {
+		fmt.Println("Write to file")
+
+		return err
+
+	}
+
+	err = ioutil.WriteFile("test.json", data, 0644)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return nil
 }

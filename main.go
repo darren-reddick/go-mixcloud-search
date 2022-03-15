@@ -18,6 +18,8 @@ func main() {
 		return
 	}
 
+	mc.WriteJsonToFile()
+
 	//fmt.Printf("%+v\n", rez)
 
 }
