@@ -9,9 +9,10 @@ import (
 
 func main() {
 
-	mc := mixcloud.NewMixcloud("graeme park", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
+	mc := mixcloud.NewMixcloud("maya jane coles", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
 
-	err := mc.GetAll()
+	//err := mc.GetAllSync()
+	err := mc.GetAllAsync()
 
 	if err != nil {
 		fmt.Println(err)

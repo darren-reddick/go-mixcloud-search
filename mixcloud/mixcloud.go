@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"sync"
 )
 
 type Paging struct {
@@ -38,7 +39,7 @@ var config = struct {
 }{
 	"api.mixcloud.com",
 	"/search/",
-	"type=cloudcast&limit=100&offset=1000",
+	"type=cloudcast&limit=100",
 }
 
 type HttpIface interface {
@@ -109,7 +110,7 @@ func (a *Mixcloud) Get(offset int) (bool, error) {
 	return more, nil
 }
 
-func (a *Mixcloud) GetAll() error {
+func (a *Mixcloud) GetAllSync() error {
 	offset := 0
 	more := true
 	var err error
@@ -121,7 +122,52 @@ func (a *Mixcloud) GetAll() error {
 			return err
 		}
 		offset += 100
-		//time.Sleep(500 * time.Millisecond)
+	}
+
+	return nil
+
+}
+
+func (a *Mixcloud) GetAllAsync() error {
+	offset := 0
+	complete := false
+	var err error
+	var wg sync.WaitGroup
+	completeChan := make(chan bool, 5)
+
+	for complete == false {
+		for i := 1; i <= 5; i++ {
+			wg.Add(1)
+
+			go func(i int) {
+				defer wg.Done()
+				var more bool
+				o := offset + ((i - 1) * 100)
+				fmt.Printf("Fetching %d\n", o)
+
+				more, err = a.Get(o)
+
+				if !more {
+					completeChan <- true
+				}
+
+			}(i)
+		}
+
+		wg.Wait()
+		fmt.Println("Done waiting")
+		select {
+		case complete = <-completeChan:
+			fmt.Println("complete signal received")
+		default:
+			fmt.Println("No signal received")
+		}
+
+		if err != nil {
+			return err
+		}
+		offset += 500
+		//return nil
 	}
 
 	return nil
