@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	mc := mixcloud.NewMixcloud("maya jane coles", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
+	mc := mixcloud.NewSearch("maya jane coles", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
 
 	//err := mc.GetAllSync()
 	err := mc.GetAllAsync()

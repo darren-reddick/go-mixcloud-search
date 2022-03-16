@@ -42,7 +42,7 @@ var config = struct {
 	"type=cloudcast&limit=100",
 }
 
-type HttpIface interface {
+type ClientIface interface {
 	Get(s string) (resp *http.Response, err error)
 }
 
@@ -51,15 +51,15 @@ type Filter struct {
 	Exclude []string
 }
 
-type Mixcloud struct {
-	Search string
+type Search struct {
+	Term string
 	Filter
-	Http HttpIface
-	Url  url.URL
+	Client ClientIface
+	Url    url.URL
 	Store
 }
 
-func NewMixcloud(s string, filter Filter, http HttpIface, store Store) Mixcloud {
+func NewSearch(s string, filter Filter, client ClientIface, store Store) Search {
 	u := url.URL{
 		Scheme:   "https",
 		Host:     config.Host,
@@ -70,16 +70,16 @@ func NewMixcloud(s string, filter Filter, http HttpIface, store Store) Mixcloud 
 	q := u.Query()
 	q.Add("q", s)
 	u.RawQuery = q.Encode()
-	return Mixcloud{
+	return Search{
 		s,
 		filter,
-		http,
+		client,
 		u,
 		store,
 	}
 }
 
-func (a *Mixcloud) Get(offset int) (bool, error) {
+func (a *Search) Get(offset int) (bool, error) {
 
 	more := false
 
@@ -88,7 +88,7 @@ func (a *Mixcloud) Get(offset int) (bool, error) {
 	q.Add("offset", strconv.Itoa(offset))
 	u.RawQuery = q.Encode()
 
-	resp, err := a.Http.Get(u.String())
+	resp, err := a.Client.Get(u.String())
 	if err != nil {
 		return false, err
 	}
@@ -110,7 +110,7 @@ func (a *Mixcloud) Get(offset int) (bool, error) {
 	return more, nil
 }
 
-func (a *Mixcloud) GetAllSync() error {
+func (a *Search) GetAllSync() error {
 	offset := 0
 	more := true
 	var err error
@@ -128,7 +128,7 @@ func (a *Mixcloud) GetAllSync() error {
 
 }
 
-func (a *Mixcloud) GetAllAsync() error {
+func (a *Search) GetAllAsync() error {
 	offset := 0
 	complete := false
 	var err error
@@ -174,7 +174,7 @@ func (a *Mixcloud) GetAllAsync() error {
 
 }
 
-func (a *Mixcloud) WriteJsonToFile() error {
+func (a *Search) WriteJsonToFile() error {
 	data := []byte{}
 	data, err := json.MarshalIndent(&a.Data, "", "    ")
 	if err != nil {
