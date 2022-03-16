@@ -9,10 +9,19 @@ import (
 
 func main() {
 
-	mc := mixcloud.NewSearch("maya jane coles", mixcloud.Filter{}, &http.Client{}, mixcloud.NewStore())
+	filter, err := mixcloud.NewFilter(
+		[]string{"ibiza"},
+		[]string{""},
+	)
+
+	if err != nil {
+		panic(err)
+	}
+
+	mc := mixcloud.NewSearch("maya jane coles", filter, &http.Client{}, mixcloud.NewStore())
 
 	//err := mc.GetAllSync()
-	err := mc.GetAllAsync()
+	err = mc.GetAllAsync()
 
 	if err != nil {
 		fmt.Println(err)

@@ -46,11 +46,6 @@ type ClientIface interface {
 	Get(s string) (resp *http.Response, err error)
 }
 
-type Filter struct {
-	Include []string
-	Exclude []string
-}
-
 type Search struct {
 	Term string
 	Filter
@@ -167,7 +162,6 @@ func (a *Search) GetAllAsync() error {
 			return err
 		}
 		offset += 500
-		//return nil
 	}
 
 	return nil
