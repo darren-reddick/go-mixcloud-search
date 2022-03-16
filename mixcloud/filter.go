@@ -38,25 +38,38 @@ func NewFilter(include []string, exclude []string) (Filter, error) {
 	}
 	f := Filter{
 		regexp.MustCompile(strings.Join(include, "|")),
-		regexp.MustCompile(""),
+		regexp.MustCompile(strings.Join(exclude, "|")),
 	}
 
 	return f, nil
 }
 
 func (f *Filter) Filter(m []Mix) []Mix {
-	replace := make([]Mix, 0)
+	included := make([]Mix, 0)
+	excluded := make([]Mix, 0)
 	if f.Include.String() != "" {
 		for _, mix := range m {
 			b := []byte(mix.Key)
 			if f.Include.Match(b) {
-				replace = append(replace, mix)
+				included = append(included, mix)
 			}
 		}
 	} else {
 
-		replace = m
+		included = m
 	}
 
-	return replace
+	if f.Exclude.String() != "" {
+		for _, mix := range included {
+			b := []byte(mix.Key)
+			if !f.Exclude.Match(b) {
+				excluded = append(excluded, mix)
+			}
+		}
+	} else {
+
+		excluded = included
+	}
+
+	return excluded
 }

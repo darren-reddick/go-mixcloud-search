@@ -77,10 +77,10 @@ func TestFilter_Filter(t *testing.T) {
 		want   []Mix
 	}{
 		{
-			name: "Test 1",
+			name: "Simple include",
 			fields: fields{
 				regexp.MustCompile("elephant"),
-				regexp.MustCompile("tiger"),
+				regexp.MustCompile(""),
 			},
 			args: args{
 				testMixes,
@@ -106,7 +106,7 @@ func TestFilter_Filter(t *testing.T) {
 			want: []Mix{},
 		},
 		{
-			name: "No include filter",
+			name: "Empty filters",
 			fields: fields{
 				regexp.MustCompile(""),
 				regexp.MustCompile(""),
@@ -115,6 +115,21 @@ func TestFilter_Filter(t *testing.T) {
 				testMixes,
 			},
 			want: testMixes,
+		},
+		{
+			name: "Include + Exclude Combo",
+			fields: fields{
+				regexp.MustCompile("elephant"),
+				regexp.MustCompile("tiger"),
+			},
+			args: args{
+				testMixes,
+			},
+			want: []Mix{
+				{
+					Key: "/ElectronicBunker/elephant-essential-mix-2011-07-09/",
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
