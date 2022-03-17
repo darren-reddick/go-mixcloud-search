@@ -10,7 +10,7 @@ import (
 func main() {
 
 	filter, err := mixcloud.NewFilter(
-		[]string{"ibiza"},
+		[]string{""},
 		[]string{""},
 	)
 
@@ -18,7 +18,7 @@ func main() {
 		panic(err)
 	}
 
-	mc := mixcloud.NewSearch("maya jane coles", filter, &http.Client{}, mixcloud.NewStore())
+	mc := mixcloud.NewSearch("sasha", filter, &http.Client{}, mixcloud.NewStore())
 
 	//err := mc.GetAllSync()
 	err = mc.GetAllAsync()

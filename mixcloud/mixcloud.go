@@ -11,6 +11,11 @@ import (
 	"sync"
 )
 
+const (
+	DefaultConcurrency int = 5
+	DefaultLimit       int = 100
+)
+
 type Paging struct {
 	Next     string `json:"next,omitempty"`
 	Previous string `json:"previous,omitempty"`
@@ -94,7 +99,7 @@ func (a *Search) Get(offset int) (bool, error) {
 	r := Response{}
 	json.Unmarshal(b, &r)
 
-	for _, mix := range r.Data {
+	for _, mix := range a.Filter.Filter(r.Data) {
 		a.Put(mix)
 	}
 
@@ -128,16 +133,16 @@ func (a *Search) GetAllAsync() error {
 	complete := false
 	var err error
 	var wg sync.WaitGroup
-	completeChan := make(chan bool, 5)
+	completeChan := make(chan bool, DefaultConcurrency)
 
 	for complete == false {
-		for i := 1; i <= 5; i++ {
+		for i := 1; i <= DefaultConcurrency; i++ {
 			wg.Add(1)
 
 			go func(i int) {
 				defer wg.Done()
 				var more bool
-				o := offset + ((i - 1) * 100)
+				o := offset + ((i - 1) * DefaultLimit)
 				fmt.Printf("Fetching %d\n", o)
 
 				more, err = a.Get(o)
@@ -155,13 +160,12 @@ func (a *Search) GetAllAsync() error {
 		case complete = <-completeChan:
 			fmt.Println("complete signal received")
 		default:
-			fmt.Println("No signal received")
 		}
 
 		if err != nil {
 			return err
 		}
-		offset += 500
+		offset += (DefaultConcurrency * DefaultLimit)
 	}
 
 	return nil

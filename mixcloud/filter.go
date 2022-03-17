@@ -21,6 +21,9 @@ func (i *invalidFilterTermError) Error() string {
 }
 
 func validateFilterTerm(s string) error {
+	if s == "" {
+		return nil
+	}
 	matched, _ := regexp.MatchString(`^\w+\z`, s)
 	if !matched {
 		return &invalidFilterTermError{s, "Invalid search term"}
@@ -31,6 +34,12 @@ func validateFilterTerm(s string) error {
 
 func NewFilter(include []string, exclude []string) (Filter, error) {
 	for _, s := range include {
+		err := validateFilterTerm(s)
+		if err != nil {
+			return Filter{}, err
+		}
+	}
+	for _, s := range exclude {
 		err := validateFilterTerm(s)
 		if err != nil {
 			return Filter{}, err
