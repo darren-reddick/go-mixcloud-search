@@ -15,13 +15,8 @@ import (
 // searchCmd represents the search command
 var searchCmd = &cobra.Command{
 	Use:   "search",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Search for mixes on mixcloud by term",
+	Long:  `Search for mixes on mixcloud by term.`,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		include, _ := cmd.Flags().GetStringSlice("include")
@@ -38,14 +33,13 @@ to quickly create a Cobra application.`,
 
 		term, _ := cmd.Flags().GetString("term")
 
-		mc, err := mixcloud.NewSearch(term, filter, &http.Client{}, mixcloud.NewStore())
+		mc, err := mixcloud.NewMixSearch(term, filter, &http.Client{}, mixcloud.NewStore())
 
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		//err := mc.GetAllSync()
 		err = mc.GetAllAsync()
 
 		if err != nil {
@@ -54,8 +48,6 @@ to quickly create a Cobra application.`,
 		}
 
 		mc.WriteJsonToFile()
-
-		//fmt.Printf("%+v\n", rez)
 
 	},
 }

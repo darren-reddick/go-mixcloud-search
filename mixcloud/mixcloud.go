@@ -12,9 +12,24 @@ import (
 )
 
 const (
-	DefaultConcurrency int = 5
-	DefaultLimit       int = 100
+	DefaultConcurrency int    = 5
+	DefaultPageLimit   int    = 100
+	DefaultHost        string = "api.mixcloud.com"
 )
+
+type config struct {
+	Concurrency int
+	PageLimit   int
+	Limit       int // the limit for individual mixes returned in total
+}
+
+func NewConfig() config {
+	return config{
+		DefaultConcurrency,
+		DefaultPageLimit,
+		0,
+	}
+}
 
 type Paging struct {
 	Next     string `json:"next,omitempty"`
@@ -37,15 +52,10 @@ type ClientResponse struct {
 	Next  *url.URL
 }
 
-var config = struct {
-	Host  string
-	Path  string
-	Query string
-}{
-	"api.mixcloud.com",
-	"/search/",
-	"type=cloudcast&limit=100",
-}
+const (
+	MixSearch = iota
+	ListenSearch
+)
 
 type ClientIface interface {
 	Get(s string) (resp *http.Response, err error)
@@ -57,6 +67,7 @@ type Search struct {
 	Client ClientIface
 	Url    url.URL
 	Store
+	config
 }
 
 type invalidSearchTermError struct {
@@ -75,16 +86,16 @@ func validateSearchTerm(s string) error {
 	return nil
 }
 
-func NewSearch(s string, filter Filter, client ClientIface, store Store) (Search, error) {
+func NewMixSearch(s string, filter Filter, client ClientIface, store Store) (Search, error) {
 	err := validateSearchTerm(s)
 	if err != nil {
 		return Search{}, err
 	}
 	u := url.URL{
 		Scheme:   "https",
-		Host:     config.Host,
-		Path:     config.Path,
-		RawQuery: config.Query,
+		Host:     DefaultHost,
+		Path:     "/search/",
+		RawQuery: "type=cloudcast",
 	}
 
 	q := u.Query()
@@ -96,6 +107,26 @@ func NewSearch(s string, filter Filter, client ClientIface, store Store) (Search
 		client,
 		u,
 		store,
+		NewConfig(),
+	}, nil
+}
+
+func NewHistorySearch(user string, filter Filter, client ClientIface, store Store) (Search, error) {
+
+	u := url.URL{
+		Scheme:   "https",
+		Host:     DefaultHost,
+		Path:     fmt.Sprintf("/%s/listens/", user),
+		RawQuery: "",
+	}
+
+	return Search{
+		"",
+		filter,
+		client,
+		u,
+		store,
+		NewConfig(),
 	}, nil
 }
 
@@ -141,7 +172,7 @@ func (a *Search) GetAllSync() error {
 		if err != nil {
 			return err
 		}
-		offset += 100
+		offset += a.config.PageLimit
 	}
 
 	return nil
@@ -153,16 +184,16 @@ func (a *Search) GetAllAsync() error {
 	complete := false
 	var err error
 	var wg sync.WaitGroup
-	completeChan := make(chan bool, DefaultConcurrency)
+	completeChan := make(chan bool, a.config.Concurrency)
 
 	for complete == false {
-		for i := 1; i <= DefaultConcurrency; i++ {
+		for i := 1; i <= a.config.Concurrency; i++ {
 			wg.Add(1)
 
 			go func(i int) {
 				defer wg.Done()
 				var more bool
-				o := offset + ((i - 1) * DefaultLimit)
+				o := offset + ((i - 1) * a.config.PageLimit)
 				fmt.Printf("Fetching %d\n", o)
 
 				more, err = a.Get(o)
@@ -175,7 +206,6 @@ func (a *Search) GetAllAsync() error {
 		}
 
 		wg.Wait()
-		fmt.Println("Done waiting")
 		select {
 		case complete = <-completeChan:
 			fmt.Println("complete signal received")
@@ -185,7 +215,7 @@ func (a *Search) GetAllAsync() error {
 		if err != nil {
 			return err
 		}
-		offset += (DefaultConcurrency * DefaultLimit)
+		offset += (a.config.Concurrency * a.config.PageLimit)
 	}
 
 	return nil

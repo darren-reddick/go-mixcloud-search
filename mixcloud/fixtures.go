@@ -433,3 +433,16 @@ var sampleResponse1 = `{
         }
     ]
 }`
+
+var pagedSampleResponse1 = `{
+    "data": [
+        {
+            "key": "/AkumaDJ/zouklove-essaie-1/",
+            "url": "https://www.mixcloud.com/AkumaDJ/zouklove-essaie-1/",
+            "name": "ZoukLove Essaie 1"
+        }
+    ],
+    "paging" : {
+        "next":"yes"
+    }
+}`
