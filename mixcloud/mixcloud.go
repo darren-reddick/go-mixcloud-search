@@ -59,7 +59,27 @@ type Search struct {
 	Store
 }
 
-func NewSearch(s string, filter Filter, client ClientIface, store Store) Search {
+type invalidSearchTermError struct {
+	term string
+	msg  string
+}
+
+func (i *invalidSearchTermError) Error() string {
+	return fmt.Sprintf("%s: %s", i.term, i.msg)
+}
+
+func validateSearchTerm(s string) error {
+	if s == "" {
+		return &invalidSearchTermError{s, "Search term is invalid"}
+	}
+	return nil
+}
+
+func NewSearch(s string, filter Filter, client ClientIface, store Store) (Search, error) {
+	err := validateSearchTerm(s)
+	if err != nil {
+		return Search{}, err
+	}
 	u := url.URL{
 		Scheme:   "https",
 		Host:     config.Host,
@@ -76,7 +96,7 @@ func NewSearch(s string, filter Filter, client ClientIface, store Store) Search 
 		client,
 		u,
 		store,
-	}
+	}, nil
 }
 
 func (a *Search) Get(offset int) (bool, error) {

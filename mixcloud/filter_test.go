@@ -131,6 +131,17 @@ func TestFilter_Filter(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Include either",
+			fields: fields{
+				regexp.MustCompile("elephant|tiger"),
+				regexp.MustCompile(""),
+			},
+			args: args{
+				testMixes,
+			},
+			want: testMixes,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

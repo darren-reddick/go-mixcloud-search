@@ -1,35 +1,11 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+
+*/
 package main
 
-import (
-	"fmt"
-	"net/http"
-
-	"github.com/darren-reddick/go-mixcloud-search/mixcloud"
-)
+import "github.com/darren-reddick/go-mixcloud-search/cmd"
 
 func main() {
-
-	filter, err := mixcloud.NewFilter(
-		[]string{""},
-		[]string{""},
-	)
-
-	if err != nil {
-		panic(err)
-	}
-
-	mc := mixcloud.NewSearch("sasha", filter, &http.Client{}, mixcloud.NewStore())
-
-	//err := mc.GetAllSync()
-	err = mc.GetAllAsync()
-
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	mc.WriteJsonToFile()
-
-	//fmt.Printf("%+v\n", rez)
-
+	cmd.Execute()
 }
