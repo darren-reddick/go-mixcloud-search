@@ -21,6 +21,7 @@ var searchCmd = &cobra.Command{
 
 		include, _ := cmd.Flags().GetStringSlice("include")
 		exclude, _ := cmd.Flags().GetStringSlice("exclude")
+		limit, _ := cmd.Flags().GetInt("limit")
 
 		filter, err := mixcloud.NewFilter(
 			include,
@@ -33,7 +34,7 @@ var searchCmd = &cobra.Command{
 
 		term, _ := cmd.Flags().GetString("term")
 
-		mc, err := mixcloud.NewMixSearch(term, filter, &http.Client{}, mixcloud.NewStore(0))
+		mc, err := mixcloud.NewMixSearch(term, filter, &http.Client{}, mixcloud.NewStore(limit))
 
 		if err != nil {
 			fmt.Println(err)
@@ -67,7 +68,6 @@ func init() {
 	searchCmd.Flags().StringSliceP("include", "i", []string{}, "Filter to include entry")
 	searchCmd.Flags().StringSliceP("exclude", "e", []string{}, "Filter to exclude entry")
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// searchCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	searchCmd.Flags().IntP("limit", "l", 0, "Limit number of results")
+
 }

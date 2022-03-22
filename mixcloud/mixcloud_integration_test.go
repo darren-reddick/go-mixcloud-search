@@ -112,14 +112,14 @@ func TestSearch_GetAllAsync(t *testing.T) {
 func TestSearch_GetAllAsyncStoreLimit(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
-	store := NewStore(30)
+	store := NewStore(5)
 	search, _ := NewMixSearch("a", filter, &mockclient, store)
 
 	_ = search.GetAllAsync()
 
 	datalen := len(search.Data)
 
-	if datalen != 30 {
-		t.Errorf("Wanted 30 items but got %d", datalen)
+	if datalen != 5 {
+		t.Errorf("Wanted 5 items but got %d", datalen)
 	}
 }

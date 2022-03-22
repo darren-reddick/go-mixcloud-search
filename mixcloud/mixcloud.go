@@ -168,7 +168,6 @@ func (a *Search) Get(offset int, limit int) (bool, error) {
 func (a *Search) GetAllAsync() error {
 	offset := 0
 	complete := false
-	var err error
 	var wg sync.WaitGroup
 	completeChan := make(chan bool, a.config.Concurrency)
 
@@ -182,7 +181,7 @@ func (a *Search) GetAllAsync() error {
 				o := offset + ((i - 1) * a.config.PageLimit)
 				fmt.Printf("Fetching %d\n", o)
 
-				more, err = a.Get(o, a.config.PageLimit)
+				more, _ = a.Get(o, a.config.PageLimit)
 
 				if !more {
 					completeChan <- true
@@ -198,9 +197,6 @@ func (a *Search) GetAllAsync() error {
 		default:
 		}
 
-		if err != nil {
-			return err
-		}
 		offset += (a.config.Concurrency * a.config.PageLimit)
 	}
 

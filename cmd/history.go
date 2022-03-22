@@ -20,6 +20,7 @@ var historyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		include, _ := cmd.Flags().GetStringSlice("include")
 		exclude, _ := cmd.Flags().GetStringSlice("exclude")
+		limit, _ := cmd.Flags().GetInt("limit")
 
 		filter, err := mixcloud.NewFilter(
 			include,
@@ -32,7 +33,7 @@ var historyCmd = &cobra.Command{
 
 		user, _ := cmd.Flags().GetString("user")
 
-		mc, err := mixcloud.NewHistorySearch(user, filter, &http.Client{}, mixcloud.NewStore(0))
+		mc, err := mixcloud.NewMixSearch(user, filter, &http.Client{}, mixcloud.NewStore(limit))
 
 		if err != nil {
 			fmt.Println(err)
@@ -58,4 +59,7 @@ func init() {
 
 	historyCmd.Flags().StringSliceP("include", "i", []string{}, "Filter to include entry")
 	historyCmd.Flags().StringSliceP("exclude", "e", []string{}, "Filter to exclude entry")
+
+	historyCmd.Flags().IntP("limit", "l", 0, "Limit number of results")
+
 }
