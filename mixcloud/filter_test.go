@@ -1,5 +1,3 @@
-//go:build unit
-
 package mixcloud
 
 import (
@@ -8,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNewFilter(t *testing.T) {
+func TestUnit_NewFilter(t *testing.T) {
 	type args struct {
 		include []string
 		exclude []string
@@ -52,7 +50,7 @@ func TestNewFilter(t *testing.T) {
 	}
 }
 
-func TestFilter_Filter(t *testing.T) {
+func TestUnit_Filter_Filter(t *testing.T) {
 	var testMixes = []Mix{
 		{
 			Key: "/ElectronicBunker/elephant-essential-mix-2011-07-09/",

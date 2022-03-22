@@ -1,5 +1,3 @@
-//go:build unit
-
 package mixcloud
 
 import (
@@ -15,7 +13,7 @@ var testMixes = map[string]Mix{
 	},
 }
 
-func TestStore_Put(t *testing.T) {
+func TestUnit_Store_Put(t *testing.T) {
 	type fields struct {
 		Data    map[string]Mix
 		limit   int

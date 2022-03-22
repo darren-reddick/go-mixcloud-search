@@ -1,4 +1,4 @@
-TESTS = unit integration
+TESTS = Unit Int
 
 .PHONY: build
 build:
@@ -7,9 +7,10 @@ build:
 .PHONY: test-%
 test-%:
 	@echo Running $* tests...
-	go test -v github.com/darren-reddick/go-mixcloud-search/mixcloud --tags=$*
+	go test -v github.com/darren-reddick/go-mixcloud-search/mixcloud -run "^Test$(*)_*"
 
 .PHONY: test
 test: $(addprefix test-, $(TESTS))
+
 
 

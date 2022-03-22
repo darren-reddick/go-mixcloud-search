@@ -1,5 +1,3 @@
-//go:build integration
-
 package mixcloud
 
 import (
@@ -32,7 +30,7 @@ func equal(a, b []string) bool {
 	return true
 }
 
-func TestSearch_Get(t *testing.T) {
+func TestInt_Search_Get(t *testing.T) {
 	type fields struct {
 		Term   string
 		Filter Filter
@@ -94,7 +92,7 @@ func TestSearch_Get(t *testing.T) {
 	}
 }
 
-func TestSearch_GetAllAsync(t *testing.T) {
+func TestInt_Search_GetAllAsync(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
 	store := NewStore(0)
@@ -109,7 +107,7 @@ func TestSearch_GetAllAsync(t *testing.T) {
 	}
 }
 
-func TestSearch_GetAllAsyncStoreLimit(t *testing.T) {
+func TestInt_Search_GetAllAsyncStoreLimit(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
 	store := NewStore(5)
