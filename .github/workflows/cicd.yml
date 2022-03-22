@@ -44,8 +44,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: gmc
-    - name: e2etest
+    - name: e2etests
       run: |
-        ls -al
         make e2etests
 
