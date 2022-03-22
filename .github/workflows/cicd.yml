@@ -45,5 +45,7 @@ jobs:
       with:
         name: gmc
     - name: e2etest
-      run: make e2etests
+      run: |
+        ls -al
+        make e2etests
 
