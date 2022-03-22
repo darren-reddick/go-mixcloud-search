@@ -152,7 +152,10 @@ func (a *Search) Get(offset int, limit int) (bool, error) {
 	json.Unmarshal(b, &r)
 
 	for _, mix := range a.Filter.Filter(r.Data) {
-		a.Put(mix)
+		err = a.Put(mix)
+		if err != nil {
+			return false, err
+		}
 	}
 
 	if r.Paging.Next != "" {

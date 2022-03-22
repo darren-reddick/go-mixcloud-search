@@ -52,7 +52,7 @@ func TestSearch_Get(t *testing.T) {
 		wantStoreKeys []string
 	}{
 		{
-			name: "",
+			name: "Simple",
 			fields: fields{
 				Term: "akumad",
 				Filter: Filter{
@@ -61,7 +61,7 @@ func TestSearch_Get(t *testing.T) {
 				},
 				Client: NewMockClient(sampleResponse1),
 				Url:    url.URL{},
-				Store:  NewStore(),
+				Store:  NewStore(0),
 			},
 			args:          args{0},
 			want:          false,
@@ -97,7 +97,7 @@ func TestSearch_Get(t *testing.T) {
 func TestSearch_GetAllAsync(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
-	store := NewStore()
+	store := NewStore(0)
 	search, _ := NewMixSearch("a", filter, &mockclient, store)
 
 	_ = search.GetAllAsync()
@@ -106,5 +106,20 @@ func TestSearch_GetAllAsync(t *testing.T) {
 
 	if datalen != 50 {
 		t.Errorf("Wanted 50 items but got %d", datalen)
+	}
+}
+
+func TestSearch_GetAllAsyncStoreLimit(t *testing.T) {
+	mockclient := NewMockPagingClient(10, 5)
+	filter, _ := NewFilter([]string{""}, []string{""})
+	store := NewStore(30)
+	search, _ := NewMixSearch("a", filter, &mockclient, store)
+
+	_ = search.GetAllAsync()
+
+	datalen := len(search.Data)
+
+	if datalen != 30 {
+		t.Errorf("Wanted 30 items but got %d", datalen)
 	}
 }

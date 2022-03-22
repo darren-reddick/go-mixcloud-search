@@ -33,7 +33,7 @@ var searchCmd = &cobra.Command{
 
 		term, _ := cmd.Flags().GetString("term")
 
-		mc, err := mixcloud.NewMixSearch(term, filter, &http.Client{}, mixcloud.NewStore())
+		mc, err := mixcloud.NewMixSearch(term, filter, &http.Client{}, mixcloud.NewStore(0))
 
 		if err != nil {
 			fmt.Println(err)

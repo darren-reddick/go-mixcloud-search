@@ -32,7 +32,7 @@ var historyCmd = &cobra.Command{
 
 		user, _ := cmd.Flags().GetString("user")
 
-		mc, err := mixcloud.NewHistorySearch(user, filter, &http.Client{}, mixcloud.NewStore())
+		mc, err := mixcloud.NewHistorySearch(user, filter, &http.Client{}, mixcloud.NewStore(0))
 
 		if err != nil {
 			fmt.Println(err)
