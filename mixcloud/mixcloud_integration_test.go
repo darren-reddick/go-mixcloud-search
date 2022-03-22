@@ -78,7 +78,7 @@ func TestSearch_Get(t *testing.T) {
 				Url:    tt.fields.Url,
 				Store:  tt.fields.Store,
 			}
-			got, err := a.Get(tt.args.offset)
+			got, err := a.Get(tt.args.offset, DefaultPageLimit)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Search.Get() error = %v, wantErr %v", err, tt.wantErr)
 				return

@@ -17,9 +17,11 @@ func NewStore() Store {
 	}
 }
 
-func (s *Store) Put(m Mix) {
+func (s *Store) Put(m Mix) error {
 	s.Lock()
 	defer s.Unlock()
 	s.Data[m.Key] = m
+
+	return nil
 
 }

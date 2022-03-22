@@ -130,13 +130,14 @@ func NewHistorySearch(user string, filter Filter, client ClientIface, store Stor
 	}, nil
 }
 
-func (a *Search) Get(offset int) (bool, error) {
+func (a *Search) Get(offset int, limit int) (bool, error) {
 
 	more := false
 
 	u := a.Url
 	q := u.Query()
 	q.Add("offset", strconv.Itoa(offset))
+	q.Add("limit", strconv.Itoa(limit))
 	u.RawQuery = q.Encode()
 
 	resp, err := a.Client.Get(u.String())
@@ -178,7 +179,7 @@ func (a *Search) GetAllAsync() error {
 				o := offset + ((i - 1) * a.config.PageLimit)
 				fmt.Printf("Fetching %d\n", o)
 
-				more, err = a.Get(o)
+				more, err = a.Get(o, a.config.PageLimit)
 
 				if !more {
 					completeChan <- true
@@ -208,7 +209,6 @@ func (a *Search) WriteJsonToFile() error {
 	data := []byte{}
 	data, err := json.MarshalIndent(&a.Data, "", "    ")
 	if err != nil {
-		fmt.Println("Write to file")
 
 		return err
 
