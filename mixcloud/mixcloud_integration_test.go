@@ -1,3 +1,5 @@
+//go:build integration
+
 package mixcloud
 
 import (
@@ -89,5 +91,20 @@ func TestSearch_Get(t *testing.T) {
 				t.Errorf("Wanted %v but got %v", tt.wantStoreKeys, d)
 			}
 		})
+	}
+}
+
+func TestSearch_GetAllAsync(t *testing.T) {
+	mockclient := NewMockPagingClient(10, 5)
+	filter, _ := NewFilter([]string{""}, []string{""})
+	store := NewStore()
+	search, _ := NewMixSearch("a", filter, &mockclient, store)
+
+	_ = search.GetAllAsync()
+
+	datalen := len(search.Data)
+
+	if datalen != 50 {
+		t.Errorf("Wanted 50 items but got %d", datalen)
 	}
 }
