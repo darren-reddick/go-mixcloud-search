@@ -21,6 +21,7 @@ e2etests:
 	chmod u+x gmc
 	./gmc search --term "beneye"
 	@echo Testing length of json output
+	ls -al
 	[ $(shell jq 'length' ./test.json) -eq 5 ]
 
 
