@@ -1,0 +1,43 @@
+on: [push, pull_request]
+name: CICD
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17.x
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Unit Test
+      run: make test-Unit
+    - name: Integration Test
+      run: make test-Int
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17.x
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Binary
+      run: GOOS=linux go build -o gmc
+    - name: Upload deploy package
+      uses: actions/upload-artifact@v2
+      with:
+        name: gmc
+        path: gmc
+  e2etests:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - name: Download deployment package
+      uses: actions/download-artifact@v2
+      with:
+        name: gmc
+    - name: e2etest
+      run: make e2etests
+
