@@ -17,10 +17,11 @@ e2etests:
 	@echo Running e2e test
 	@echo Simple query to mixcloud with limit
 	rm -f test.json
+	touch myfile
 	chmod u+x gmc
 	./gmc search --term "beneye"
 	@echo Testing length of json output
-	[ $(shell jq 'length' test.json) -eq 5 ]
+	[ $(shell jq 'length' ./test.json) -eq 5 ]
 
 
 
