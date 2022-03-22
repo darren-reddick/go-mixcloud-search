@@ -16,6 +16,7 @@ jobs:
       run: make test-Int
   build:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     needs: [test]
     steps:
     - name: Install Go
@@ -33,6 +34,7 @@ jobs:
         path: gmc
   e2etests:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
     needs: [build]
     steps:
     - name: Install package
