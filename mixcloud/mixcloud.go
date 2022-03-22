@@ -161,24 +161,6 @@ func (a *Search) Get(offset int) (bool, error) {
 	return more, nil
 }
 
-func (a *Search) GetAllSync() error {
-	offset := 0
-	more := true
-	var err error
-
-	for more == true {
-		fmt.Printf("Fetching offset %d\n", offset)
-		more, err = a.Get(offset)
-		if err != nil {
-			return err
-		}
-		offset += a.config.PageLimit
-	}
-
-	return nil
-
-}
-
 func (a *Search) GetAllAsync() error {
 	offset := 0
 	complete := false
