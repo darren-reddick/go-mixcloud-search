@@ -50,6 +50,7 @@ Usage:
   gmc search [flags]
 
 Flags:
+  -d, --debug             Enable debug
   -e, --exclude strings   Filter to exclude entry
   -h, --help              help for search
   -i, --include strings   Filter to include entry
@@ -74,6 +75,7 @@ Usage:
   gmc history [flags]
 
 Flags:
+  -d, --debug             Enable debug
   -e, --exclude strings   Filter to exclude entry
   -h, --help              help for history
   -i, --include strings   Filter to include entry
