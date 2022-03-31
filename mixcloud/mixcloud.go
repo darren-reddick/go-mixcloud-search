@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"sync"
+
+	"go.uber.org/zap"
 )
 
 const (
@@ -68,6 +70,7 @@ type Search struct {
 	Url    url.URL
 	Store
 	config
+	logger *zap.Logger
 }
 
 type invalidSearchTermError struct {
@@ -86,7 +89,7 @@ func validateSearchTerm(s string) error {
 	return nil
 }
 
-func NewMixSearch(s string, filter Filter, client ClientIface, store Store) (Search, error) {
+func NewMixSearch(s string, filter Filter, client ClientIface, store Store, logger *zap.Logger) (Search, error) {
 	err := validateSearchTerm(s)
 	if err != nil {
 		return Search{}, err
@@ -108,10 +111,11 @@ func NewMixSearch(s string, filter Filter, client ClientIface, store Store) (Sea
 		u,
 		store,
 		NewConfig(),
+		logger,
 	}, nil
 }
 
-func NewHistorySearch(user string, filter Filter, client ClientIface, store Store) (Search, error) {
+func NewHistorySearch(user string, filter Filter, client ClientIface, store Store, logger *zap.Logger) (Search, error) {
 
 	u := url.URL{
 		Scheme:   "https",
@@ -127,6 +131,7 @@ func NewHistorySearch(user string, filter Filter, client ClientIface, store Stor
 		u,
 		store,
 		NewConfig(),
+		logger,
 	}, nil
 }
 
@@ -139,6 +144,8 @@ func (a *Search) Get(offset int, limit int) (bool, error) {
 	q.Add("offset", strconv.Itoa(offset))
 	q.Add("limit", strconv.Itoa(limit))
 	u.RawQuery = q.Encode()
+
+	a.logger.Debug(u.String())
 
 	resp, err := a.Client.Get(u.String())
 	if err != nil {
@@ -165,13 +172,13 @@ func (a *Search) Get(offset int, limit int) (bool, error) {
 	return more, nil
 }
 
-func (a *Search) GetAllAsync() error {
+func (a *Search) GetAllParallel() error {
 	offset := 0
 	complete := false
 	var wg sync.WaitGroup
 	completeChan := make(chan bool, a.config.Concurrency)
 
-	for complete == false {
+	for !complete {
 		for i := 1; i <= a.config.Concurrency; i++ {
 			wg.Add(1)
 
@@ -179,7 +186,7 @@ func (a *Search) GetAllAsync() error {
 				defer wg.Done()
 				var more bool
 				o := offset + ((i - 1) * a.config.PageLimit)
-				fmt.Printf("Fetching %d\n", o)
+				a.logger.Debug(fmt.Sprintf("Thread %d fetching %d", i, o))
 
 				more, _ = a.Get(o, a.config.PageLimit)
 
@@ -193,7 +200,7 @@ func (a *Search) GetAllAsync() error {
 		wg.Wait()
 		select {
 		case complete = <-completeChan:
-			fmt.Println("complete signal received")
+			a.logger.Debug("complete signal received")
 		default:
 		}
 
@@ -205,7 +212,7 @@ func (a *Search) GetAllAsync() error {
 }
 
 func (a *Search) WriteJsonToFile() error {
-	data := []byte{}
+	var data []byte
 	data, err := json.MarshalIndent(&a.Data, "", "    ")
 	if err != nil {
 
@@ -215,7 +222,7 @@ func (a *Search) WriteJsonToFile() error {
 
 	err = ioutil.WriteFile("test.json", data, 0644)
 	if err != nil {
-		fmt.Println(err)
+		a.logger.Error(err.Error())
 	}
 	return nil
 }

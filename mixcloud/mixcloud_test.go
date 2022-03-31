@@ -4,7 +4,15 @@ import (
 	"net/url"
 	"regexp"
 	"testing"
+
+	"go.uber.org/zap"
 )
+
+var logger *zap.Logger
+
+func init() {
+	logger, _ = zap.NewProduction()
+}
 
 func dataKeys(m map[string]Mix) []string {
 	keys := make([]string, len(m))
@@ -75,6 +83,7 @@ func TestInt_Search_Get(t *testing.T) {
 				Client: tt.fields.Client,
 				Url:    tt.fields.Url,
 				Store:  tt.fields.Store,
+				logger: logger,
 			}
 			got, err := a.Get(tt.args.offset, DefaultPageLimit)
 			if (err != nil) != tt.wantErr {
@@ -92,13 +101,13 @@ func TestInt_Search_Get(t *testing.T) {
 	}
 }
 
-func TestInt_Search_GetAllAsync(t *testing.T) {
+func TestInt_Search_GetAllParallel(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
 	store := NewStore(0)
-	search, _ := NewMixSearch("a", filter, &mockclient, store)
+	search, _ := NewMixSearch("a", filter, &mockclient, store, logger)
 
-	_ = search.GetAllAsync()
+	_ = search.GetAllParallel()
 
 	datalen := len(search.Data)
 
@@ -107,13 +116,13 @@ func TestInt_Search_GetAllAsync(t *testing.T) {
 	}
 }
 
-func TestInt_Search_GetAllAsyncStoreLimit(t *testing.T) {
+func TestInt_Search_GetAllParallelStoreLimit(t *testing.T) {
 	mockclient := NewMockPagingClient(10, 5)
 	filter, _ := NewFilter([]string{""}, []string{""})
 	store := NewStore(5)
-	search, _ := NewMixSearch("a", filter, &mockclient, store)
+	search, _ := NewMixSearch("a", filter, &mockclient, store, logger)
 
-	_ = search.GetAllAsync()
+	_ = search.GetAllParallel()
 
 	datalen := len(search.Data)
 
