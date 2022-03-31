@@ -18,6 +18,13 @@ var historyCmd = &cobra.Command{
 	Short: "Search listen history for a user",
 	Long:  `Search listen history for a user.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		err := initLogger(cmd.Flags())
+		if err != nil {
+			fmt.Printf("Error initializing logger: %s", err)
+			return
+		}
+
 		include, _ := cmd.Flags().GetStringSlice("include")
 		exclude, _ := cmd.Flags().GetStringSlice("exclude")
 		limit, _ := cmd.Flags().GetInt("limit")
@@ -33,14 +40,14 @@ var historyCmd = &cobra.Command{
 
 		user, _ := cmd.Flags().GetString("user")
 
-		mc, err := mixcloud.NewMixSearch(user, filter, &http.Client{}, mixcloud.NewStore(limit))
+		mc, err := mixcloud.NewHistorySearch(user, filter, &http.Client{}, mixcloud.NewStore(limit), logger)
 
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		err = mc.GetAllAsync()
+		err = mc.GetAllParallel()
 
 		if err != nil {
 			fmt.Println(err)
@@ -61,5 +68,7 @@ func init() {
 	historyCmd.Flags().StringSliceP("exclude", "e", []string{}, "Filter to exclude entry")
 
 	historyCmd.Flags().IntP("limit", "l", 0, "Limit number of results")
+
+	historyCmd.Flags().BoolP("debug", "d", false, "Enable debug")
 
 }
